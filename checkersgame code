@@ -1,0 +1,86 @@
+board = [[' ', 'W', ' ', 'W', ' ', 'W', ' ', 'W'],
+         ['W', ' ', 'W', ' ', 'W', ' ', 'W', ' '],
+         [' ', 'W', ' ', 'W', ' ', 'W', ' ', 'W'],
+         [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+         [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+         ['B', ' ', 'B', ' ', 'B', ' ', 'B', ' '],
+         [' ', 'B', ' ', 'B', ' ', 'B', ' ', 'B'],
+         ['B', ' ', 'B', ' ', 'B', ' ', 'B', ' ']]
+
+def print_board(board):
+    print('   0  1  2  3  4  5  6  7')
+    print('  -----------------------')
+    for i in range(8):
+        print(i, '|', end=' ')
+        for j in range(8):
+            print(board[i][j], end=' ')
+        print()
+
+def is_jump(move):
+    return abs(move[0] - move[2]) == 2
+
+def perform_move(move, player):
+    i1, j1, i2, j2 = move
+    board[i2][j2] = board[i1][j1]
+    board[i1][j1] = ' '
+    
+    if is_jump(move):
+        i_middle = (i1 + i2) // 2
+        j_middle = (j1 + j2) // 2
+        board[i_middle][j_middle] = ' '
+
+def get_possible_moves(player):
+    moves = []
+    
+    for i in range(8):
+        for j in range(8):
+            if board[i][j] == player:
+                if player == 'W' or player == 'K':
+                    if i >= 2 and (board[i-1][j-1] == 'B' or board[i-1][j-1] == 'BK') and board[i-2][j-2] == ' ':
+                        moves.append((i, j, i-2, j-2))
+                    if i >= 2 and (board[i-1][j+1] == 'B' or board[i-1][j+1] == 'BK') and board[i-2][j+2] == ' ':
+                        moves.append((i, j, i-2, j+2))
+                if player == 'B' or player == 'BK':
+                    if i <= 5 and (board[i+1][j-1] == 'W' or board[i+1][j-1] == 'WK') and board[i+2][j-2] == ' ':
+                        moves.append((i, j, i+2, j-2))
+                    if i <= 5 and (board[i+1][j+1] == 'W' or board[i+1][j+1] == 'WK') and board[i+2][j+2] == ' ':
+                        moves.append((i, j, i+2, j+2))
+    
+    return moves
+
+print_board(board)
+
+turn = 'W' # 'W' for white, 'B' for black
+while True:
+    possible_moves = get_possible_moves(turn)
+    
+    if len(possible_moves) == 0:
+        break
+    
+    print("\nIt's", turn, "'s turn.")
+    print('Possible moves:', possible_moves)
+        
+    move = input('Enter your move (i1, j1, i2, j2): ')
+    move = tuple(map(int, move.split(',')))
+    
+    while move not in possible_moves:
+        print('Invalid move, try again.')
+        move = input('Enter your move (i1, j1, i2, j2): ')
+        move = tuple(map(int, move.split(',')))
+    
+    perform_move(move, turn)
+    
+    if turn == 'W' and move[2] == 7:
+        board[move[2]][move[3]] = 'WK'
+    
+    if turn == 'B' and move[2] == 0:
+        board[move[2]][move[3]] = 'BK'
+        
+    print_board(board)
+    
+    if turn == 'W':
+        turn = 'B'
+    else:
+        turn = 'W'
+
+print('Game over.')
